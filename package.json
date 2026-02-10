@@ -40,12 +40,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/luziadev/luzia.git",
+    "url": "git+https://github.com/luziadev/sdk.git",
     "directory": "packages/sdk"
   },
   "homepage": "https://luzia.dev/docs/sdk",
   "bugs": {
-    "url": "https://github.com/luziadev/luzia/issues"
+    "url": "https://github.com/luziadev/sdk/issues"
   },
   "publishConfig": {
     "access": "public"
