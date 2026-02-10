@@ -1,0 +1,61 @@
+{
+  "name": "@luziadev/sdk",
+  "version": "1.0.0-beta.2",
+  "description": "Official TypeScript SDK for the Luzia cryptocurrency pricing API",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "generate": "bun run scripts/generate-types.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "test:build": "bun run build && bun run scripts/test-build.ts",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": [
+    "luzia",
+    "cryptocurrency",
+    "api",
+    "sdk",
+    "typescript",
+    "crypto",
+    "trading",
+    "binance",
+    "coinbase"
+  ],
+  "author": "Luzia <support@luzia.dev>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luziadev/luzia.git",
+    "directory": "packages/sdk"
+  },
+  "homepage": "https://luzia.dev/docs/sdk",
+  "bugs": {
+    "url": "https://github.com/luziadev/luzia/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.6",
+    "openapi-typescript": "^7.4.4",
+    "typescript": "^5.7.3"
+  }
+}
