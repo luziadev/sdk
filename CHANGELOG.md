@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-02-17
+
+### Added
+
+- **History resource:** `luzia.history.get(exchange, symbol, options?)` - Fetch historical OHLCV candlestick data
+  - Supports intervals: `1m`, `5m`, `15m`, `1h`, `4h`, `1d`
+  - Configurable time range with `start`/`end` timestamps (Unix ms)
+  - Configurable `limit` for number of candles returned
+  - Tier-based lookback limits (Free: 30 days, Pro: 90 days, Enterprise: unlimited)
+- New types: `OHLCVCandle`, `OHLCVResponse`, `CandleInterval`, `GetHistoryOptions`
+- Exported `HistoryResource` class
+
+### Changed
+
+- Updated repository URL to `github.com/luziadev/sdk`
+- Regenerated types from latest OpenAPI specification
+
 ## [0.1.0] - 2026-01-26
 
 ### Added
