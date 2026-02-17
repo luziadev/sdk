@@ -32,27 +32,21 @@ jobs:
 
       - name: Build package
         run: bun run build
-        working-directory: packages/sdk
 
       - name: Run tests
         run: bun test
-        working-directory: packages/sdk
 
       - name: Extract version from tag
         id: version
-        run: echo "version=${GITHUB_REF#refs/tags/sdk-v}" >> $GITHUB_OUTPUT
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
       - name: Set package version
         run: |
-          cd packages/sdk
-          # Use jq to update version (avoids npm scanning workspace)
           jq '.version = "${{ steps.version.outputs.version }}"' package.json > package.json.tmp
           mv package.json.tmp package.json
 
       - name: Pack and publish to npm
         run: |
-          cd packages/sdk
-          # Pack creates tarball with only files specified in "files" field
           npm pack --pack-destination /tmp
           npm publish /tmp/luziadev-sdk-${{ steps.version.outputs.version }}.tgz --access public
         env:
@@ -71,15 +65,15 @@ jobs:
 
       - name: Extract version from tag
         id: version
-        run: echo "version=${GITHUB_REF#refs/tags/sdk-v}" >> $GITHUB_OUTPUT
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          name: SDK v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
           generate_release_notes: true
           body: |
-            ## 📦 Installation
+            ## Installation
 
             ```bash
             # Using npm
@@ -92,7 +86,7 @@ jobs:
             pnpm add @luziadev/sdk
             ```
 
-            ## 🚀 Quick Start
+            ## Quick Start
 
             ```typescript
             import { Luzia } from '@luziadev/sdk'
@@ -109,8 +103,8 @@ jobs:
             const exchanges = await luzia.exchanges.list()
             ```
 
-            ## 📚 Documentation
+            ## Documentation
 
             - [npm package](https://www.npmjs.com/package/@luziadev/sdk)
-            - [README](https://github.com/${{ github.repository }}/tree/main/packages/sdk#readme)
+            - [README](https://github.com/${{ github.repository }}#readme)
             - [API Documentation](https://luzia.dev/docs)
