@@ -34,6 +34,13 @@ console.log(`Found ${total} tickers`)
 
 // Get markets with filters
 const { markets } = await luzia.markets.list('binance', { quote: 'USDT' })
+
+// Get historical OHLCV candles
+const { candles } = await luzia.history.get('binance', 'BTC/USDT', {
+  interval: '1h',
+  limit: 24,
+})
+console.log(`Last close: $${candles[candles.length - 1].close}`)
 ```
 
 ## Configuration
@@ -102,6 +109,47 @@ const { markets, total } = await luzia.markets.list('binance', {
   offset: 0,
 })
 ```
+
+### History (OHLCV Candles)
+
+```typescript
+// Get 24h of hourly candles (default)
+const { candles, count } = await luzia.history.get('binance', 'BTC/USDT')
+
+// Specify interval and limit
+const { candles } = await luzia.history.get('binance', 'ETH/USDT', {
+  interval: '15m',  // '1m' | '5m' | '15m' | '1h' | '4h' | '1d'
+  limit: 96,        // Number of candles (max: 500)
+})
+
+// Specify a time range
+const { candles } = await luzia.history.get('binance', 'BTC/USDT', {
+  interval: '1d',
+  start: Date.now() - 30 * 24 * 60 * 60 * 1000, // 30 days ago (Unix ms)
+  end: Date.now(),
+})
+
+// Each candle contains:
+for (const candle of candles) {
+  console.log({
+    timestamp: candle.timestamp, // Candle open time (Unix ms)
+    open: candle.open,
+    high: candle.high,
+    low: candle.low,
+    close: candle.close,
+    volume: candle.volume,       // Base currency volume
+    quoteVolume: candle.quoteVolume,
+    trades: candle.trades,       // Number of trades in interval
+  })
+}
+```
+
+**Lookback limits by tier:**
+
+| Tier | Max Lookback |
+|------|-------------|
+| Free | 30 days |
+| Pro  | 90 days |
 
 ## WebSocket (Real-Time Updates)
 
@@ -302,6 +350,10 @@ import type {
   ExchangeStatus,
   Market,
   Ticker,
+  OHLCVCandle,
+  OHLCVResponse,
+  CandleInterval,
+  GetHistoryOptions,
   RateLimitInfo,
   LuziaOptions,
   RetryOptions,
