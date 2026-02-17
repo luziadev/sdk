@@ -2,7 +2,7 @@
  * Auto-generated TypeScript types from the Luzia OpenAPI specification.
  * DO NOT EDIT MANUALLY - regenerate with: bun run generate
  *
- * Generated at: 2026-02-02T18:42:34.250Z
+ * Generated at: 2026-02-17T14:12:04.321Z
  */
 
 export type paths = {
@@ -18,6 +18,41 @@ export type paths = {
      * @description Returns a list of all enabled exchanges supported by Luzia. Requires authentication.
      */
     get: operations['getExchanges']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  [path: `/v1/history/${string}/${string}`]: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Get OHLCV candlestick data
+     * @description Returns historical OHLCV (Open, High, Low, Close, Volume) candle data
+     *     for a specific exchange and trading pair.
+     *
+     *     Candles are built from live WebSocket ticks (1m) and aggregated into
+     *     larger intervals (5m, 15m, 1h, 4h, 1d) by a background worker.
+     *
+     *     **Tier-based lookback limits:**
+     *
+     *     | Tier | Max Lookback |
+     *     |------|-------------|
+     *     | Free | 30 days |
+     *     | Pro | 90 days |
+     *     | Enterprise | Unlimited |
+     *
+     *     If the `start` timestamp exceeds the tier's lookback limit, the API
+     *     returns 403 with a `LOOKBACK_EXCEEDED` error code.
+     */
+    get: operations['getHistory']
     put?: never
     post?: never
     delete?: never
@@ -217,6 +252,93 @@ export type components = {
       offset?: number
       /** @description Total number of markets matching filters */
       total?: number
+    }
+    /** @description A single OHLCV candlestick */
+    OHLCVCandle: {
+      /**
+       * Format: double
+       * @description Closing price (last price in the interval)
+       * @example 35200
+       */
+      close?: number
+      /**
+       * Format: double
+       * @description Highest price during the interval
+       * @example 35500
+       */
+      high?: number
+      /**
+       * Format: double
+       * @description Lowest price during the interval
+       * @example 34800
+       */
+      low?: number
+      /**
+       * Format: double
+       * @description Opening price (first price in the interval)
+       * @example 35000.5
+       */
+      open?: number
+      /**
+       * Format: double
+       * @description Estimated quote currency volume
+       * @example 4345678.9
+       */
+      quoteVolume?: number | null
+      /**
+       * Format: int64
+       * @description Candle open time (Unix ms, aligned to interval boundary)
+       * @example 1700000000000
+       */
+      timestamp?: number
+      /**
+       * @description Number of ticker updates during the interval
+       * @example 342
+       */
+      trades?: number | null
+      /**
+       * Format: double
+       * @description Estimated base currency volume
+       * @example 123.45
+       */
+      volume?: number
+    }
+    /** @description Response containing OHLCV candlestick data */
+    OHLCVResponse: {
+      candles?: components['schemas']['OHLCVCandle'][]
+      /**
+       * @description Number of candles returned
+       * @example 24
+       */
+      count?: number
+      /**
+       * Format: int64
+       * @description Requested end timestamp (Unix ms)
+       * @example 1700000000000
+       */
+      end?: number
+      /**
+       * @description Exchange identifier
+       * @example binance
+       */
+      exchange?: string
+      /**
+       * @description Candle interval
+       * @example 1h
+       * @enum {string}
+       */
+      interval?: '1m' | '5m' | '15m' | '1h' | '4h' | '1d'
+      /**
+       * Format: int64
+       * @description Requested start timestamp (Unix ms)
+       * @example 1699913600000
+       */
+      start?: number
+      /**
+       * @description Normalized trading pair symbol
+       * @example BTC/USDT
+       */
+      symbol?: string
     }
     /** @description Real-time price data for a trading pair */
     Ticker: {
@@ -520,6 +642,105 @@ export interface operations {
         }
       }
       500: components['responses']['InternalServerError']
+    }
+  }
+  getHistory: {
+    parameters: {
+      query?: {
+        /**
+         * @description End timestamp (Unix milliseconds, default now)
+         * @example 1700086400000
+         */
+        end?: number
+        /**
+         * @description Candle interval
+         * @example 1h
+         */
+        interval?: '1m' | '5m' | '15m' | '1h' | '4h' | '1d'
+        /** @description Maximum number of candles to return (default 500, max 1000) */
+        limit?: number
+        /**
+         * @description Start timestamp (Unix milliseconds, default 24h ago)
+         * @example 1700000000000
+         */
+        start?: number
+      }
+      header?: never
+      path: {
+        /**
+         * @description Exchange identifier (lowercase)
+         * @example binance
+         */
+        exchange: components['parameters']['ExchangeId']
+        /**
+         * @description Trading pair symbol (use dash instead of slash)
+         * @example BTC-USDT
+         */
+        symbol: components['parameters']['Symbol']
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OHLCV candlestick data */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          /**
+           * @example {
+           *       "exchange": "binance",
+           *       "symbol": "BTC/USDT",
+           *       "interval": "1h",
+           *       "candles": [
+           *         {
+           *           "timestamp": 1700000000000,
+           *           "open": 35000.5,
+           *           "high": 35500,
+           *           "low": 34800,
+           *           "close": 35200,
+           *           "volume": 123.45,
+           *           "quoteVolume": 4345678.9,
+           *           "trades": 342
+           *         }
+           *       ],
+           *       "count": 1,
+           *       "start": 1699913600000,
+           *       "end": 1700086400000
+           *     }
+           */
+          'application/json': components['schemas']['OHLCVResponse']
+        }
+      }
+      400: components['responses']['BadRequest']
+      401: components['responses']['Unauthorized']
+      /** @description Lookback exceeds tier limit */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          /**
+           * @example {
+           *       "error": "Forbidden",
+           *       "message": "Your free plan allows up to 30 days of historical data. Upgrade for more.",
+           *       "code": "LOOKBACK_EXCEEDED",
+           *       "details": {
+           *         "tier": "free",
+           *         "maxLookbackDays": 30,
+           *         "requestedStart": 1697000000000,
+           *         "cutoff": 1697500000000
+           *       }
+           *     }
+           */
+          'application/json': components['schemas']['Error']
+        }
+      }
+      404: components['responses']['NotFound']
+      429: components['responses']['RateLimited']
+      500: components['responses']['InternalServerError']
+      503: components['responses']['ServiceUnavailable']
     }
   }
   getMarketsByExchange: {

@@ -52,7 +52,12 @@ export {
 } from './errors.ts'
 
 // Resources
-export { ExchangesResource, MarketsResource, TickersResource } from './resources/index.ts'
+export {
+  ExchangesResource,
+  HistoryResource,
+  MarketsResource,
+  TickersResource,
+} from './resources/index.ts'
 
 // Retry
 export type { OnRetryCallback, ResolvedRetryOptions, RetryContext } from './retry.ts'
@@ -66,15 +71,19 @@ export {
 // Types
 export type {
   ApiErrorResponse,
+  CandleInterval,
   Exchange,
   ExchangeListResponse,
   ExchangeStatus,
+  GetHistoryOptions,
   ListMarketsOptions,
   ListTickersFilteredOptions,
   ListTickersOptions,
   LuziaOptions,
   Market,
   MarketListResponse,
+  OHLCVCandle,
+  OHLCVResponse,
   PaginationOptions,
   RateLimitErrorResponse,
   RateLimitInfo,

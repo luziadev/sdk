@@ -32,11 +32,19 @@ export type TickerListResponse = components['schemas']['TickerListResponse']
 /** API error response format */
 export type ApiErrorResponse = components['schemas']['Error']
 
+/** A single OHLCV candlestick */
+export type OHLCVCandle = components['schemas']['OHLCVCandle']
+
+/** Response containing OHLCV candlestick data */
+export type OHLCVResponse = components['schemas']['OHLCVResponse']
+
 // ─────────────────────────────────────────────────────────────
 // SDK-specific types (not in OpenAPI)
 // ─────────────────────────────────────────────────────────────
 
 export type {
+  CandleInterval,
+  GetHistoryOptions,
   ListMarketsOptions,
   ListTickersFilteredOptions,
   ListTickersOptions,

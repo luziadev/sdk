@@ -128,3 +128,22 @@ export interface ListMarketsOptions extends PaginationOptions {
   /** Filter by active status */
   active?: boolean
 }
+
+/**
+ * Valid candle intervals for OHLCV history data.
+ */
+export type CandleInterval = '1m' | '5m' | '15m' | '1h' | '4h' | '1d'
+
+/**
+ * Options for fetching historical OHLCV candle data.
+ */
+export interface GetHistoryOptions {
+  /** Candle interval (default: "1h") */
+  interval?: CandleInterval
+  /** Start timestamp in Unix milliseconds (default: 24h ago) */
+  start?: number
+  /** End timestamp in Unix milliseconds (default: now) */
+  end?: number
+  /** Maximum number of candles to return (default: 300, max: 500) */
+  limit?: number
+}
