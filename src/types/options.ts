@@ -132,7 +132,7 @@ export interface ListMarketsOptions extends PaginationOptions {
 /**
  * Valid candle intervals for OHLCV history data.
  */
-export type CandleInterval = '1m' | '5m' | '15m' | '1h' | '4h' | '1d'
+export type CandleInterval = '1m' | '5m' | '15m' | '1h' | '1d'
 
 /**
  * Options for fetching historical OHLCV candle data.

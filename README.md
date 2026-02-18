@@ -118,7 +118,7 @@ const { candles, count } = await luzia.history.get('binance', 'BTC/USDT')
 
 // Specify interval and limit
 const { candles } = await luzia.history.get('binance', 'ETH/USDT', {
-  interval: '15m',  // '1m' | '5m' | '15m' | '1h' | '4h' | '1d'
+  interval: '15m',  // '1m' | '5m' | '15m' | '1h' | '1d'
   limit: 96,        // Number of candles (max: 500)
 })
 
@@ -132,7 +132,7 @@ const { candles } = await luzia.history.get('binance', 'BTC/USDT', {
 // Each candle contains:
 for (const candle of candles) {
   console.log({
-    timestamp: candle.timestamp, // Candle open time (Unix ms)
+    timestamp: candle.timestamp, // Candle open time (RFC 3339 string)
     open: candle.open,
     high: candle.high,
     low: candle.low,

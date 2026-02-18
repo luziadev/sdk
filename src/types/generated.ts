@@ -39,7 +39,7 @@ export type paths = {
      *     for a specific exchange and trading pair.
      *
      *     Candles are built from live WebSocket ticks (1m) and aggregated into
-     *     larger intervals (5m, 15m, 1h, 4h, 1d) by a background worker.
+     *     larger intervals (5m, 15m, 1h, 1d) by a background worker.
      *
      *     **Tier-based lookback limits:**
      *
@@ -286,11 +286,11 @@ export type components = {
        */
       quoteVolume?: number | null
       /**
-       * Format: int64
-       * @description Candle open time (Unix ms, aligned to interval boundary)
-       * @example 1700000000000
+       * Format: date-time
+       * @description Candle open time (RFC 3339, aligned to interval boundary)
+       * @example "2023-11-14T22:13:20.000Z"
        */
-      timestamp?: number
+      timestamp?: string
       /**
        * @description Number of ticker updates during the interval
        * @example 342
@@ -312,11 +312,11 @@ export type components = {
        */
       count?: number
       /**
-       * Format: int64
-       * @description Requested end timestamp (Unix ms)
-       * @example 1700000000000
+       * Format: date-time
+       * @description Requested end timestamp (RFC 3339)
+       * @example "2023-11-14T22:13:20.000Z"
        */
-      end?: number
+      end?: string
       /**
        * @description Exchange identifier
        * @example binance
@@ -327,13 +327,13 @@ export type components = {
        * @example 1h
        * @enum {string}
        */
-      interval?: '1m' | '5m' | '15m' | '1h' | '4h' | '1d'
+      interval?: '1m' | '5m' | '15m' | '1h' | '1d'
       /**
-       * Format: int64
-       * @description Requested start timestamp (Unix ms)
-       * @example 1699913600000
+       * Format: date-time
+       * @description Requested start timestamp (RFC 3339)
+       * @example "2023-11-13T22:13:20.000Z"
        */
-      start?: number
+      start?: string
       /**
        * @description Normalized trading pair symbol
        * @example BTC/USDT
@@ -413,11 +413,11 @@ export type components = {
        */
       symbol: string
       /**
-       * Format: int64
-       * @description Unix timestamp in milliseconds
-       * @example 1704067200000
+       * Format: date-time
+       * @description Timestamp in RFC 3339 format
+       * @example "2024-01-01T00:00:00.000Z"
        */
-      timestamp?: number
+      timestamp?: string
       /**
        * Format: double
        * @description 24-hour trading volume in base currency
@@ -656,7 +656,7 @@ export interface operations {
          * @description Candle interval
          * @example 1h
          */
-        interval?: '1m' | '5m' | '15m' | '1h' | '4h' | '1d'
+        interval?: '1m' | '5m' | '15m' | '1h' | '1d'
         /** @description Maximum number of candles to return (default 500, max 1000) */
         limit?: number
         /**
@@ -695,7 +695,7 @@ export interface operations {
            *       "interval": "1h",
            *       "candles": [
            *         {
-           *           "timestamp": 1700000000000,
+           *           "timestamp": "2023-11-14T22:13:20.000Z",
            *           "open": 35000.5,
            *           "high": 35500,
            *           "low": 34800,
@@ -706,8 +706,8 @@ export interface operations {
            *         }
            *       ],
            *       "count": 1,
-           *       "start": 1699913600000,
-           *       "end": 1700086400000
+           *       "start": "2023-11-13T22:13:20.000Z",
+           *       "end": "2023-11-15T22:13:20.000Z"
            *     }
            */
           'application/json': components['schemas']['OHLCVResponse']
@@ -729,8 +729,8 @@ export interface operations {
            *       "details": {
            *         "tier": "free",
            *         "maxLookbackDays": 30,
-           *         "requestedStart": 1697000000000,
-           *         "cutoff": 1697500000000
+           *         "requestedStart": "2023-10-11T10:13:20.000Z",
+           *         "cutoff": "2023-10-17T00:53:20.000Z"
            *       }
            *     }
            */
