@@ -58,9 +58,9 @@ export interface WSTickerData {
     quoteVolume: number | null
     change: number | null
     changePercent: number | null
-    timestamp: number
+    timestamp: string
   }
-  timestamp: number
+  timestamp: string
 }
 
 export interface WSConnectedData {
@@ -90,7 +90,7 @@ export interface WSErrorData {
 
 export interface WSPongData {
   type: 'pong'
-  timestamp: number
+  timestamp: string
 }
 
 export type WSServerMessage =

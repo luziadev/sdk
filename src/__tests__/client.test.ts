@@ -328,7 +328,7 @@ describe('Luzia resources', () => {
         high: 51000,
         low: 49000,
         volume: 1000,
-        timestamp: 1704067200000,
+        timestamp: '2024-01-01T00:00:00.000Z',
       })
 
       const ticker = await client.tickers.get('binance', 'BTC/USDT')
