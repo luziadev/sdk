@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-02-18
+
+### Changed
+
+- **Breaking:** All timestamps now use RFC 3339 strings instead of Unix milliseconds (`number` → `string`)
+  - `OHLCVCandle.timestamp`, `OHLCVResponse.start`, `OHLCVResponse.end`
+  - `Ticker.timestamp`
+  - WebSocket types: `WSTickerData.timestamp`, `WSPongData.timestamp`
+- Removed `4h` candle interval from `CandleInterval` type
+- Regenerated types from latest OpenAPI specification
+- Updated README examples to reflect string timestamps
+
 ## [1.1.0] - 2026-02-17
 
 ### Added
