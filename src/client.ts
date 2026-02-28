@@ -9,6 +9,7 @@ import { createErrorFromResponse, LuziaError, parseRateLimitHeaders } from './er
 import { ExchangesResource } from './resources/exchanges.ts'
 import { HistoryResource } from './resources/history.ts'
 import { MarketsResource } from './resources/markets.ts'
+import { OrderBookResource } from './resources/orderbook.ts'
 import { TickersResource } from './resources/tickers.ts'
 import { type OnRetryCallback, withRetry } from './retry.ts'
 import type { LuziaOptions, RateLimitInfo, RetryOptions } from './types/index.ts'
@@ -146,6 +147,8 @@ export class Luzia {
   readonly history: HistoryResource
   /** Markets resource for listing trading pairs */
   readonly markets: MarketsResource
+  /** Orderbook resource for getting depth data */
+  readonly orderbook: OrderBookResource
   /** Tickers resource for getting price data */
   readonly tickers: TickersResource
 
@@ -164,6 +167,7 @@ export class Luzia {
     this.exchanges = new ExchangesResource(this)
     this.history = new HistoryResource(this)
     this.markets = new MarketsResource(this)
+    this.orderbook = new OrderBookResource(this)
     this.tickers = new TickersResource(this)
   }
 

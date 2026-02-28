@@ -45,6 +45,7 @@ export type OHLCVResponse = components['schemas']['OHLCVResponse']
 export type {
   CandleInterval,
   GetHistoryOptions,
+  GetOrderBookOptions,
   ListMarketsOptions,
   ListTickersFilteredOptions,
   ListTickersOptions,
@@ -53,6 +54,26 @@ export type {
   RateLimitInfo,
   RetryOptions,
 } from './options.ts'
+
+// ─────────────────────────────────────────────────────────────
+// Orderbook types (manually defined — compact wire format)
+// ─────────────────────────────────────────────────────────────
+
+/** Real-time orderbook snapshot for a trading pair */
+export interface OrderBookResponse {
+  /** Exchange identifier */
+  exchange: string
+  /** Normalized symbol (e.g., "BTC/USDT") */
+  symbol: string
+  /** Bid levels sorted descending by price: [price, amount][] */
+  bids: [number, number][]
+  /** Ask levels sorted ascending by price: [price, amount][] */
+  asks: [number, number][]
+  /** Epoch milliseconds timestamp */
+  timestamp: number
+  /** Number of price levels returned */
+  depth: number
+}
 
 // ─────────────────────────────────────────────────────────────
 // Additional type aliases for convenience
