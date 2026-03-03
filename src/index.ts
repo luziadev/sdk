@@ -56,7 +56,6 @@ export {
   ExchangesResource,
   HistoryResource,
   MarketsResource,
-  OrderBookResource,
   TickersResource,
 } from './resources/index.ts'
 
@@ -77,7 +76,6 @@ export type {
   ExchangeListResponse,
   ExchangeStatus,
   GetHistoryOptions,
-  GetOrderBookOptions,
   ListMarketsOptions,
   ListTickersFilteredOptions,
   ListTickersOptions,
@@ -86,7 +84,6 @@ export type {
   MarketListResponse,
   OHLCVCandle,
   OHLCVResponse,
-  OrderBookResponse,
   PaginationOptions,
   RateLimitErrorResponse,
   RateLimitInfo,
@@ -102,7 +99,6 @@ export type {
   WSErrorData,
   WSEventCallback,
   WSEventMap,
-  WSOrderBookData,
   WSPongData,
   WSServerMessage,
   WSSubscribedData,

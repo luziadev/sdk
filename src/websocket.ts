@@ -93,21 +93,8 @@ export interface WSPongData {
   timestamp: string
 }
 
-export interface WSOrderBookData {
-  type: 'orderbook'
-  exchange: string
-  symbol: string
-  data: {
-    bids: [number, number][]
-    asks: [number, number][]
-    timestamp: number
-  }
-  timestamp: string
-}
-
 export type WSServerMessage =
   | WSTickerData
-  | WSOrderBookData
   | WSConnectedData
   | WSSubscribedData
   | WSUnsubscribedData
@@ -117,7 +104,6 @@ export type WSServerMessage =
 export interface WSEventMap {
   connected: WSConnectedData
   ticker: WSTickerData
-  orderbook: WSOrderBookData
   subscribed: WSSubscribedData
   unsubscribed: WSUnsubscribedData
   error: WSErrorData
@@ -299,10 +285,6 @@ export class LuziaWebSocket {
 
       case 'ticker':
         this.emit('ticker', msg)
-        break
-
-      case 'orderbook':
-        this.emit('orderbook', msg)
         break
 
       case 'subscribed':

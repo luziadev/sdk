@@ -130,14 +130,6 @@ export interface ListMarketsOptions extends PaginationOptions {
 }
 
 /**
- * Options for fetching orderbook data.
- */
-export interface GetOrderBookOptions {
-  /** Number of price levels per side (default: 20, max: 20) */
-  depth?: number
-}
-
-/**
  * Valid candle intervals for OHLCV history data.
  */
 export type CandleInterval = '1m' | '5m' | '15m' | '1h' | '1d'
