@@ -55,6 +55,25 @@ export type {
 } from './options.ts'
 
 // ─────────────────────────────────────────────────────────────
+// Billing types
+// ─────────────────────────────────────────────────────────────
+
+export type {
+  BalanceInfo,
+  BalanceResponse,
+  BalanceTransaction,
+  ListTransactionsOptions,
+  PricingResponse,
+  RestPricingEntry,
+  TopUpAmount,
+  TopUpResponse,
+  TransactionsResponse,
+  TransactionType,
+  WebSocketPricingEntry,
+} from './billing.ts'
+export { ALLOWED_TOP_UP_AMOUNTS } from './billing.ts'
+
+// ─────────────────────────────────────────────────────────────
 // Additional type aliases for convenience
 // ─────────────────────────────────────────────────────────────
 

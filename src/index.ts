@@ -45,6 +45,8 @@ export { Luzia } from './client.ts'
 export type { ErrorCode, LuziaErrorOptions } from './errors.ts'
 export {
   createErrorFromResponse,
+  InsufficientBalanceError,
+  isInsufficientBalanceError,
   isLuziaError,
   isRetryableError,
   LuziaError,
@@ -53,6 +55,7 @@ export {
 
 // Resources
 export {
+  BillingResource,
   ExchangesResource,
   HistoryResource,
   MarketsResource,
@@ -71,6 +74,9 @@ export {
 // Types
 export type {
   ApiErrorResponse,
+  BalanceInfo,
+  BalanceResponse,
+  BalanceTransaction,
   CandleInterval,
   Exchange,
   ExchangeListResponse,
@@ -79,18 +85,27 @@ export type {
   ListMarketsOptions,
   ListTickersFilteredOptions,
   ListTickersOptions,
+  ListTransactionsOptions,
   LuziaOptions,
   Market,
   MarketListResponse,
   OHLCVCandle,
   OHLCVResponse,
   PaginationOptions,
+  PricingResponse,
   RateLimitErrorResponse,
   RateLimitInfo,
+  RestPricingEntry,
   RetryOptions,
   Ticker,
   TickerListResponse,
+  TopUpAmount,
+  TopUpResponse,
+  TransactionsResponse,
+  TransactionType,
+  WebSocketPricingEntry,
 } from './types/index.ts'
+export { ALLOWED_TOP_UP_AMOUNTS } from './types/index.ts'
 export type {
   WebSocketConstructor,
   WebSocketOptions,

@@ -242,6 +242,79 @@ ws.disconnect()
 | Pro | 5 | 50 |
 | Enterprise | 25 | 500 |
 
+## Balance Management
+
+Check your balance, view transaction history, discover pricing, and top up your account.
+
+### Check Balance
+
+```typescript
+const balance = await luzia.billing.getBalance()
+console.log(`Balance: $${balance.balance_usd}`)
+console.log(`Lifetime spent: $${balance.lifetime_spent_usd}`)
+```
+
+### View Pricing
+
+```typescript
+// Public endpoint (no auth required)
+const pricing = await luzia.billing.getPricing()
+for (const entry of pricing.rest) {
+  console.log(`${entry.endpoint}: $${entry.cost_usd}/${entry.unit}`)
+}
+```
+
+### Transaction History
+
+```typescript
+const { transactions, total } = await luzia.billing.getTransactions({
+  page: 1,
+  limit: 20,
+  type: 'debit', // Optional: 'debit' | 'credit' | 'refund' | 'bonus'
+})
+
+for (const tx of transactions) {
+  console.log(`${tx.type}: ${tx.amount_usd} - ${tx.description}`)
+}
+```
+
+### Top Up
+
+```typescript
+// Initiate a top-up ($5, $10, $25, $50, or $100)
+const { checkout_url } = await luzia.billing.topUp(1000) // $10.00
+// Redirect user to checkout_url to complete payment
+```
+
+### Balance from Response Headers
+
+Every authenticated API response includes balance information in headers. Access it via `balanceInfo`:
+
+```typescript
+await luzia.tickers.get('binance', 'BTC/USDT')
+
+const info = luzia.balanceInfo
+if (info) {
+  console.log(`Remaining: $${info.balance}`)
+  console.log(`Last request cost: $${info.cost}`)
+}
+```
+
+### Handling Insufficient Balance
+
+```typescript
+import { InsufficientBalanceError } from '@luziadev/sdk'
+
+try {
+  await luzia.tickers.get('binance', 'BTC/USDT')
+} catch (error) {
+  if (error instanceof InsufficientBalanceError) {
+    console.log(`Balance: $${error.balance}`)
+    console.log(`Top up at: ${error.topUpUrl}`)
+  }
+}
+```
+
 ## Error Handling
 
 The SDK uses a single `LuziaError` class with a `code` property to distinguish error types:
@@ -256,6 +329,9 @@ try {
     switch (error.code) {
       case 'auth':
         console.log('Invalid API key')
+        break
+      case 'insufficient_balance':
+        console.log(`Balance too low: $${error.balanceUsd}. Top up: ${error.topUpUrl}`)
         break
       case 'rate_limit':
         console.log(`Rate limited. Retry after ${error.retryAfter} seconds`)
@@ -322,7 +398,7 @@ The SDK automatically retries requests on:
 - Server errors (500, 502, 503, 504)
 - Network errors
 
-Non-retryable errors (400, 401, 403, 404) are thrown immediately.
+Non-retryable errors (400, 401, 402, 403, 404) are thrown immediately.
 
 ### Custom Retry Handling
 
@@ -357,6 +433,16 @@ import type {
   RateLimitInfo,
   LuziaOptions,
   RetryOptions,
+  // Billing
+  BalanceInfo,
+  BalanceResponse,
+  BalanceTransaction,
+  PricingResponse,
+  TopUpResponse,
+  TopUpAmount,
+  TransactionsResponse,
+  TransactionType,
+  ListTransactionsOptions,
   // WebSocket
   WebSocketOptions,
   WSTickerData,

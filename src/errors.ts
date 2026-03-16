@@ -12,6 +12,7 @@ import type { ApiErrorResponse, RateLimitErrorResponse, RateLimitInfo } from './
  */
 export type ErrorCode =
   | 'auth' // 401 - Authentication failed
+  | 'insufficient_balance' // 402 - Insufficient balance
   | 'not_found' // 404 - Resource not found
   | 'validation' // 400 - Invalid request
   | 'rate_limit' // 429 - Rate limit exceeded
@@ -40,6 +41,10 @@ export interface LuziaErrorOptions {
   details?: Record<string, unknown>
   /** Timeout duration in ms (for timeout errors) */
   timeoutMs?: number
+  /** Current balance in USD (for insufficient_balance errors) */
+  balanceUsd?: string
+  /** URL to top up balance (for insufficient_balance errors) */
+  topUpUrl?: string
 }
 
 /**
@@ -90,6 +95,10 @@ export class LuziaError extends Error {
   readonly details?: Record<string, unknown>
   /** Timeout duration in ms (for timeout errors) */
   readonly timeoutMs?: number
+  /** Current balance in USD (for insufficient_balance errors) */
+  readonly balanceUsd?: string
+  /** URL to top up balance (for insufficient_balance errors) */
+  readonly topUpUrl?: string
 
   constructor(message: string, options?: LuziaErrorOptions) {
     super(message, { cause: options?.cause })
@@ -101,7 +110,52 @@ export class LuziaError extends Error {
     this.retryAfter = options?.retryAfter
     this.details = options?.details
     this.timeoutMs = options?.timeoutMs
+    this.balanceUsd = options?.balanceUsd
+    this.topUpUrl = options?.topUpUrl
   }
+}
+
+/**
+ * Error thrown when a request fails due to insufficient balance (402).
+ *
+ * Provides `balance` (current USD balance) and `topUpUrl` for easy recovery.
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   await luzia.tickers.get('binance', 'BTC/USDT')
+ * } catch (error) {
+ *   if (error instanceof InsufficientBalanceError) {
+ *     console.log(`Balance: $${error.balance}`)
+ *     console.log(`Top up at: ${error.topUpUrl}`)
+ *   }
+ * }
+ * ```
+ */
+export class InsufficientBalanceError extends LuziaError {
+  /** Current balance in USD */
+  readonly balance: string
+  declare readonly topUpUrl: string
+
+  constructor(message: string, balance: string, topUpUrl: string, correlationId?: string) {
+    super(message, {
+      status: 402,
+      code: 'insufficient_balance',
+      correlationId,
+      balanceUsd: balance,
+      topUpUrl,
+    })
+    this.name = 'InsufficientBalanceError'
+    this.balance = balance
+    this.topUpUrl = topUpUrl
+  }
+}
+
+/**
+ * Type guard to check if an error is an InsufficientBalanceError.
+ */
+export function isInsufficientBalanceError(error: unknown): error is InsufficientBalanceError {
+  return error instanceof InsufficientBalanceError
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -173,6 +227,13 @@ export async function createErrorFromResponse(
         correlationId,
       })
 
+    case 402: {
+      const fields = body as Record<string, unknown> | null
+      const balanceUsd = (fields?.balance_usd as string) ?? '0.00'
+      const topUpUrl = (fields?.top_up_url as string) ?? ''
+      return new InsufficientBalanceError(message, balanceUsd, topUpUrl, correlationId)
+    }
+
     case 404:
       return new LuziaError(message, {
         status,
@@ -224,28 +285,25 @@ export async function createErrorFromResponse(
  * - `timeout` - Request timeouts
  * - `server` - Server errors (5xx)
  */
+const RETRYABLE_CODES: ReadonlySet<ErrorCode> = new Set([
+  'rate_limit',
+  'network',
+  'timeout',
+  'server',
+])
+
 export function isRetryableError(error: unknown): boolean {
   if (!(error instanceof LuziaError)) {
     return false
   }
 
-  // Check by error code
-  if (
-    error.code === 'rate_limit' ||
-    error.code === 'network' ||
-    error.code === 'timeout' ||
-    error.code === 'server'
-  ) {
+  if (RETRYABLE_CODES.has(error.code)) {
     return true
   }
 
-  // Also check by status for generic errors
-  const status = error.status
-  if (status !== undefined) {
-    return status === 408 || status === 429 || status >= 500
-  }
-
-  return false
+  // Fallback: check by status for manually constructed errors
+  const { status } = error
+  return status !== undefined && (status === 408 || status === 429 || status >= 500)
 }
 
 /**

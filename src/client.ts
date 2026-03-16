@@ -6,11 +6,13 @@
  */
 
 import { createErrorFromResponse, LuziaError, parseRateLimitHeaders } from './errors.ts'
+import { BillingResource } from './resources/billing.ts'
 import { ExchangesResource } from './resources/exchanges.ts'
 import { HistoryResource } from './resources/history.ts'
 import { MarketsResource } from './resources/markets.ts'
 import { TickersResource } from './resources/tickers.ts'
 import { type OnRetryCallback, withRetry } from './retry.ts'
+import type { BalanceInfo } from './types/billing.ts'
 import type { LuziaOptions, RateLimitInfo, RetryOptions } from './types/index.ts'
 import { LuziaWebSocket, type WebSocketOptions } from './websocket.ts'
 
@@ -31,10 +33,14 @@ type QueryValue = string | number | boolean | undefined
  * Request options for internal use.
  */
 export interface RequestOptions {
+  /** HTTP method (default: GET) */
+  method?: 'GET' | 'POST'
   /** Whether to include authentication header */
   auth?: boolean
   /** Query parameters */
   query?: Record<string, QueryValue>
+  /** JSON request body (for POST requests) */
+  body?: Record<string, unknown>
   /** Override retry options for this request */
   retry?: RetryOptions
   /** Callback invoked before each retry */
@@ -140,6 +146,11 @@ export class Luzia {
   /** Most recent rate limit information from the last request */
   private _lastRateLimitInfo: RateLimitInfo | null = null
 
+  /** Most recent balance information from the last request's response headers */
+  private _lastBalanceInfo: BalanceInfo | null = null
+
+  /** Billing resource for balance, pricing, transactions, and top-ups */
+  readonly billing: BillingResource
   /** Exchange resource for listing supported exchanges */
   readonly exchanges: ExchangesResource
   /** History resource for fetching OHLCV candle data */
@@ -161,6 +172,7 @@ export class Luzia {
     this.fetchImpl = options.fetch ?? globalThis.fetch
 
     // Initialize resource instances
+    this.billing = new BillingResource(this)
     this.exchanges = new ExchangesResource(this)
     this.history = new HistoryResource(this)
     this.markets = new MarketsResource(this)
@@ -189,6 +201,17 @@ export class Luzia {
   }
 
   /**
+   * Get the most recent balance information from response headers.
+   *
+   * Updated after every authenticated request with `X-Balance-Remaining`
+   * and `X-Request-Cost` headers. Returns null if no requests have been made
+   * or headers were not present.
+   */
+  get balanceInfo(): BalanceInfo | null {
+    return this._lastBalanceInfo
+  }
+
+  /**
    * Convert a symbol from normalized format (BTC/USDT) to URL format (BTC-USDT).
    */
   symbolToUrl(symbol: string): string {
@@ -208,7 +231,7 @@ export class Luzia {
    * @internal This method is intended for use by resource classes.
    */
   async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-    const { auth = true, query, retry, onRetry } = options
+    const { auth = true, method = 'GET', query, body, retry, onRetry } = options
 
     // Merge retry options
     const mergedRetryOptions = {
@@ -216,7 +239,11 @@ export class Luzia {
       ...retry,
     }
 
-    return withRetry(() => this._doRequest<T>(path, auth, query), mergedRetryOptions, onRetry)
+    return withRetry(
+      () => this._doRequest<T>(path, method, auth, query, body),
+      mergedRetryOptions,
+      onRetry
+    )
   }
 
   /**
@@ -224,8 +251,10 @@ export class Luzia {
    */
   private async _doRequest<T>(
     path: string,
+    method: 'GET' | 'POST',
     auth: boolean,
-    query?: Record<string, QueryValue>
+    query?: Record<string, QueryValue>,
+    body?: Record<string, unknown>
   ): Promise<T> {
     const url = buildUrl(this.baseUrl, path, query)
     const headers = buildHeaders(this.apiKey, auth)
@@ -235,14 +264,26 @@ export class Luzia {
 
     try {
       const response = await this.fetchImpl(url, {
-        method: 'GET',
+        method,
         headers,
         signal: controller.signal,
+        ...(body !== undefined && { body: JSON.stringify(body) }),
       })
 
+      // Parse rate limit headers
       const rateLimitInfo = parseRateLimitHeaders(response.headers)
       if (rateLimitInfo) {
         this._lastRateLimitInfo = rateLimitInfo
+      }
+
+      // Parse balance headers (present on authenticated requests to paid endpoints)
+      const balanceRemaining = response.headers.get('X-Balance-Remaining')
+      const requestCost = response.headers.get('X-Request-Cost')
+      if (balanceRemaining !== null && requestCost !== null) {
+        this._lastBalanceInfo = {
+          balance: balanceRemaining,
+          cost: requestCost,
+        }
       }
 
       if (!response.ok) {
