@@ -25,12 +25,12 @@ export interface BalanceInfo {
 export interface BalanceResponse {
   /** Current balance formatted as USD string */
   balance_usd: string
-  /** Current balance in cents */
-  balance_cents: number
+  /** Current balance in units (1 USD = 10,000 units) */
+  balance_units: number
   /** Total lifetime spending formatted as USD string */
   lifetime_spent_usd: string
-  /** Total lifetime spending in cents */
-  lifetime_spent_cents: number
+  /** Total lifetime spending in units (1 USD = 10,000 units) */
+  lifetime_spent_units: number
   /** Free credit amount formatted as USD string (always "5.00") */
   free_credit_usd: string
   /** URL to the top-up page */
@@ -115,11 +115,11 @@ export interface TopUpResponse {
 }
 
 /**
- * Allowed top-up amounts in cents.
+ * Allowed top-up amounts in units (1 USD = 10,000 units).
  */
-export const ALLOWED_TOP_UP_AMOUNTS = [500, 1000, 2500, 5000, 10000] as const
+export const ALLOWED_TOP_UP_AMOUNTS = [50_000, 100_000, 250_000, 500_000, 1_000_000] as const
 
 /**
- * A valid top-up amount in cents ($5, $10, $25, $50, $100).
+ * A valid top-up amount in units ($5, $10, $25, $50, $100).
  */
 export type TopUpAmount = (typeof ALLOWED_TOP_UP_AMOUNTS)[number]

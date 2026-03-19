@@ -33,9 +33,9 @@ describe('BillingResource', () => {
     it('should return balance information', async () => {
       const balanceData = {
         balance_usd: '4.50',
-        balance_cents: 450,
+        balance_units: 45_000,
         lifetime_spent_usd: '0.50',
-        lifetime_spent_cents: 50,
+        lifetime_spent_units: 5_000,
         free_credit_usd: '5.00',
         top_up_url: 'https://luzia.dev/billing/top-up',
       }
@@ -127,13 +127,13 @@ describe('BillingResource', () => {
       }
 
       const { client, mockFetch } = createClient(topUpData)
-      const result = await client.billing.topUp(1000)
+      const result = await client.billing.topUp(100_000)
 
       expect(result).toEqual(topUpData)
       const [url, init] = mockFetch.mock.calls[0]
       expect(url).toBe('http://localhost:3000/billing/top-up')
       expect(init?.method).toBe('POST')
-      expect(JSON.parse(init?.body as string)).toEqual({ amount_cents: 1000 })
+      expect(JSON.parse(init?.body as string)).toEqual({ amount_units: 100_000 })
     })
   })
 })

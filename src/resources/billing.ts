@@ -83,15 +83,15 @@ export class BillingResource {
    * Creates a one-time payment checkout session and returns the URL
    * to redirect the user to. Allowed amounts: $5, $10, $25, $50, $100.
    *
-   * @param amountCents - Top-up amount in cents (500, 1000, 2500, 5000, or 10000)
+   * @param amountUnits - Top-up amount in units (50_000, 100_000, 250_000, 500_000, or 1_000_000)
    * @returns Checkout URL, top-up ID, and formatted amount
    * @throws {LuziaError} With code 'auth' if API key is invalid
    * @throws {LuziaError} With code 'validation' if amount is not an allowed tier
    */
-  async topUp(amountCents: TopUpAmount): Promise<TopUpResponse> {
+  async topUp(amountUnits: TopUpAmount): Promise<TopUpResponse> {
     return this.client.request<TopUpResponse>('/billing/top-up', {
       method: 'POST',
-      body: { amount_cents: amountCents },
+      body: { amount_units: amountUnits },
     })
   }
 }
