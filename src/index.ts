@@ -52,6 +52,7 @@ export {
 } from './errors.ts'
 
 // Resources
+export type { ListExchangesOptions } from './resources/exchanges.ts'
 export {
   ExchangesResource,
   HistoryResource,
@@ -75,6 +76,7 @@ export type {
   Exchange,
   ExchangeListResponse,
   ExchangeStatus,
+  ExchangeType,
   GetHistoryOptions,
   ListMarketsOptions,
   ListTickersFilteredOptions,
@@ -82,6 +84,7 @@ export type {
   LuziaOptions,
   Market,
   MarketListResponse,
+  MarketType,
   OHLCVCandle,
   OHLCVResponse,
   PaginationOptions,
@@ -90,6 +93,7 @@ export type {
   RetryOptions,
   Ticker,
   TickerListResponse,
+  Token,
 } from './types/index.ts'
 export type {
   WebSocketConstructor,

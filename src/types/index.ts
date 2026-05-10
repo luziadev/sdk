@@ -17,8 +17,17 @@ export type Exchange = components['schemas']['Exchange']
 /** Response from the list exchanges endpoint */
 export type ExchangeListResponse = components['schemas']['ExchangeListResponse']
 
+/** Exchange kind: centralized (`cex`) or decentralized (`dex`). */
+export type ExchangeType = NonNullable<Exchange['type']>
+
+/** On-chain token referenced by a DEX market. */
+export type Token = components['schemas']['Token']
+
 /** Trading pair (market) information */
 export type Market = components['schemas']['Market']
+
+/** Market classification (e.g. `spot`, `futures`, `dex`). */
+export type MarketType = NonNullable<Market['type']>
 
 /** Response from the list markets endpoint */
 export type MarketListResponse = components['schemas']['MarketListResponse']

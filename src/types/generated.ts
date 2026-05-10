@@ -2,7 +2,7 @@
  * Auto-generated TypeScript types from the Luzia OpenAPI specification.
  * DO NOT EDIT MANUALLY - regenerate with: bun run generate
  *
- * Generated at: 2026-02-17T14:12:04.321Z
+ * Generated at: 2026-05-10T13:50:03.292Z
  */
 
 export type paths = {
@@ -16,6 +16,9 @@ export type paths = {
     /**
      * List supported exchanges
      * @description Returns a list of all enabled exchanges supported by Luzia. Requires authentication.
+     *
+     *     Supports both centralized exchanges (CEX) and decentralized exchanges (DEX, e.g. Uniswap V3/V4, Raydium).
+     *     Use the `type` query parameter to filter by exchange kind.
      */
     get: operations['getExchanges']
     put?: never
@@ -163,6 +166,17 @@ export type components = {
     /** @description Exchange information */
     Exchange: {
       /**
+       * @description Blockchain identifier hosting this DEX. `null` for CEX exchanges.
+       * @example solana
+       */
+      chainId?: string | null
+      /**
+       * @description DexScreener `dexId` value identifying the underlying DEX protocol
+       *     (e.g. `raydium`, `uniswapv3`, `uniswapv4`). `null` for CEX exchanges.
+       * @example raydium
+       */
+      dexId?: string | null
+      /**
        * @description Unique exchange identifier
        * @example binance
        */
@@ -179,6 +193,12 @@ export type components = {
        */
       status?: 'operational' | 'degraded' | 'down' | 'maintenance'
       /**
+       * @description Exchange kind. `cex` for centralized exchanges, `dex` for decentralized exchanges.
+       * @example cex
+       * @enum {string}
+       */
+      type?: 'cex' | 'dex'
+      /**
        * Format: uri
        * @description Exchange website URL
        * @example https://binance.com
@@ -188,7 +208,12 @@ export type components = {
     ExchangeListResponse: {
       exchanges?: components['schemas']['Exchange'][]
     }
-    /** @description Trading pair information */
+    /**
+     * @description Trading pair information. Centralized-exchange (CEX) markets always include
+     *     `baseId`, `quoteId`, `precision`, and `limits`. Decentralized-exchange (DEX)
+     *     markets set `type` to `"dex"` and include on-chain metadata
+     *     (`chainId`, `poolAddress`, `poolType`, `baseToken`, `quoteToken`) instead.
+     */
     Market: {
       /**
        * @description Whether the market is currently active
@@ -201,17 +226,24 @@ export type components = {
        */
       base: string
       /**
-       * @description Exchange-specific base currency identifier
+       * @description Exchange-specific base currency identifier (CEX markets only).
        * @example BTC
        */
-      baseId: string
+      baseId?: string
+      /** @description Base-side on-chain token (DEX markets only). */
+      baseToken?: components['schemas']['Token'] | null
+      /**
+       * @description Blockchain identifier for DEX markets. `null` or absent for CEX markets.
+       * @example solana
+       */
+      chainId?: string | null
       /**
        * @description Exchange identifier
        * @example binance
        */
       exchange: string
-      /** @description Trading limits */
-      limits: {
+      /** @description Trading limits (CEX markets only). */
+      limits?: {
         amount?: {
           max?: number
           min?: number
@@ -221,8 +253,18 @@ export type components = {
           min?: number
         }
       }
-      /** @description Decimal precision for price and amount */
-      precision: {
+      /**
+       * @description On-chain pool / pair address for DEX markets.
+       * @example 6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg
+       */
+      poolAddress?: string | null
+      /**
+       * @description Pool type for DEX markets (e.g. `amm`, `clmm`, `cpmm`, `v3`, `v4`).
+       * @example clmm
+       */
+      poolType?: string | null
+      /** @description Decimal precision for price and amount (CEX markets only). */
+      precision?: {
         /** @example 8 */
         amount?: number
         /** @example 2 */
@@ -234,15 +276,25 @@ export type components = {
        */
       quote: string
       /**
-       * @description Exchange-specific quote currency identifier
+       * @description Exchange-specific quote currency identifier (CEX markets only).
        * @example USDT
        */
-      quoteId: string
+      quoteId?: string
+      /** @description Quote-side on-chain token (DEX markets only). */
+      quoteToken?: components['schemas']['Token'] | null
       /**
        * @description Normalized trading pair symbol
        * @example BTC/USDT
        */
       symbol: string
+      /**
+       * @description Market classification. `spot`, `futures`, and `margin` are CEX classifications;
+       *     `stock` indicates a tokenized equity (Kraken xStocks); `dex` indicates an
+       *     on-chain DEX pool. May be omitted on legacy CEX responses (treat as `spot`).
+       * @example dex
+       * @enum {string}
+       */
+      type?: 'spot' | 'futures' | 'margin' | 'stock' | 'dex'
     }
     MarketListResponse: {
       /** @description Maximum results per page */
@@ -286,11 +338,11 @@ export type components = {
        */
       quoteVolume?: number | null
       /**
-       * Format: date-time
-       * @description Candle open time (RFC 3339, aligned to interval boundary)
-       * @example "2023-11-14T22:13:20.000Z"
+       * Format: int64
+       * @description Candle open time (Unix ms, aligned to interval boundary)
+       * @example 1700000000000
        */
-      timestamp?: string
+      timestamp?: number
       /**
        * @description Number of ticker updates during the interval
        * @example 342
@@ -312,11 +364,11 @@ export type components = {
        */
       count?: number
       /**
-       * Format: date-time
-       * @description Requested end timestamp (RFC 3339)
-       * @example "2023-11-14T22:13:20.000Z"
+       * Format: int64
+       * @description Requested end timestamp (Unix ms)
+       * @example 1700000000000
        */
-      end?: string
+      end?: number
       /**
        * @description Exchange identifier
        * @example binance
@@ -329,11 +381,11 @@ export type components = {
        */
       interval?: '1m' | '5m' | '15m' | '1h' | '1d'
       /**
-       * Format: date-time
-       * @description Requested start timestamp (RFC 3339)
-       * @example "2023-11-13T22:13:20.000Z"
+       * Format: int64
+       * @description Requested start timestamp (Unix ms)
+       * @example 1699913600000
        */
-      start?: string
+      start?: number
       /**
        * @description Normalized trading pair symbol
        * @example BTC/USDT
@@ -413,11 +465,11 @@ export type components = {
        */
       symbol: string
       /**
-       * Format: date-time
-       * @description Timestamp in RFC 3339 format
-       * @example "2024-01-01T00:00:00.000Z"
+       * Format: int64
+       * @description Unix timestamp in milliseconds
+       * @example 1704067200000
        */
-      timestamp?: string
+      timestamp?: number
       /**
        * Format: double
        * @description 24-hour trading volume in base currency
@@ -433,6 +485,29 @@ export type components = {
       tickers?: components['schemas']['Ticker'][]
       /** @description Total number of tickers matching filters */
       total?: number
+    }
+    /** @description On-chain token referenced by a DEX market. */
+    Token: {
+      /**
+       * @description On-chain token address (Solana mint or EVM contract address).
+       * @example EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+       */
+      address: string
+      /**
+       * @description Blockchain identifier (matches Exchange.chainId).
+       * @example solana
+       */
+      chainId: string
+      /**
+       * @description Token decimal places.
+       * @example 6
+       */
+      decimals: number
+      /**
+       * @description Token symbol.
+       * @example USDC
+       */
+      symbol: string
     }
   }
   responses: {
@@ -559,10 +634,12 @@ export type components = {
      */
     BaseFilter: string
     /**
-     * @description Exchange identifier (lowercase)
+     * @description Exchange identifier (lowercase). Includes centralized exchanges
+     *     (`binance`, `bybit`, `coinbase`, `kraken`, `okx`) and decentralized
+     *     exchanges (e.g. `raydium-solana`, `uniswapv3-ethereum`, `uniswapv4-ethereum`).
      * @example binance
      */
-    ExchangeId: 'binance' | 'bybit' | 'coinbase' | 'kraken' | 'okx'
+    ExchangeId: string
     /** @description Maximum number of results (default 100, max 200) */
     Limit: number
     /** @description Number of results to skip */
@@ -601,7 +678,13 @@ export type $defs = Record<string, never>
 export interface operations {
   getExchanges: {
     parameters: {
-      query?: never
+      query?: {
+        /**
+         * @description Filter by exchange kind (`cex` or `dex`).
+         * @example dex
+         */
+        type?: 'cex' | 'dex'
+      }
       header?: never
       path?: never
       cookie?: never
@@ -621,19 +704,19 @@ export interface operations {
            *           "id": "binance",
            *           "name": "Binance",
            *           "status": "operational",
-           *           "websiteUrl": "https://binance.com"
+           *           "websiteUrl": "https://binance.com",
+           *           "type": "cex",
+           *           "chainId": null,
+           *           "dexId": null
            *         },
            *         {
-           *           "id": "bybit",
-           *           "name": "Bybit",
+           *           "id": "raydium-solana",
+           *           "name": "Raydium (Solana)",
            *           "status": "operational",
-           *           "websiteUrl": "https://bybit.com"
-           *         },
-           *         {
-           *           "id": "coinbase",
-           *           "name": "Coinbase",
-           *           "status": "operational",
-           *           "websiteUrl": "https://coinbase.com"
+           *           "websiteUrl": "https://raydium.io",
+           *           "type": "dex",
+           *           "chainId": "solana",
+           *           "dexId": "raydium"
            *         }
            *       ]
            *     }
@@ -641,6 +724,7 @@ export interface operations {
           'application/json': components['schemas']['ExchangeListResponse']
         }
       }
+      400: components['responses']['BadRequest']
       500: components['responses']['InternalServerError']
     }
   }
@@ -668,7 +752,9 @@ export interface operations {
       header?: never
       path: {
         /**
-         * @description Exchange identifier (lowercase)
+         * @description Exchange identifier (lowercase). Includes centralized exchanges
+         *     (`binance`, `bybit`, `coinbase`, `kraken`, `okx`) and decentralized
+         *     exchanges (e.g. `raydium-solana`, `uniswapv3-ethereum`, `uniswapv4-ethereum`).
          * @example binance
          */
         exchange: components['parameters']['ExchangeId']
@@ -695,7 +781,7 @@ export interface operations {
            *       "interval": "1h",
            *       "candles": [
            *         {
-           *           "timestamp": "2023-11-14T22:13:20.000Z",
+           *           "timestamp": 1700000000000,
            *           "open": 35000.5,
            *           "high": 35500,
            *           "low": 34800,
@@ -706,8 +792,8 @@ export interface operations {
            *         }
            *       ],
            *       "count": 1,
-           *       "start": "2023-11-13T22:13:20.000Z",
-           *       "end": "2023-11-15T22:13:20.000Z"
+           *       "start": 1699913600000,
+           *       "end": 1700086400000
            *     }
            */
           'application/json': components['schemas']['OHLCVResponse']
@@ -729,8 +815,8 @@ export interface operations {
            *       "details": {
            *         "tier": "free",
            *         "maxLookbackDays": 30,
-           *         "requestedStart": "2023-10-11T10:13:20.000Z",
-           *         "cutoff": "2023-10-17T00:53:20.000Z"
+           *         "requestedStart": 1697000000000,
+           *         "cutoff": 1697500000000
            *       }
            *     }
            */
@@ -766,7 +852,9 @@ export interface operations {
       header?: never
       path: {
         /**
-         * @description Exchange identifier (lowercase)
+         * @description Exchange identifier (lowercase). Includes centralized exchanges
+         *     (`binance`, `bybit`, `coinbase`, `kraken`, `okx`) and decentralized
+         *     exchanges (e.g. `raydium-solana`, `uniswapv3-ethereum`, `uniswapv4-ethereum`).
          * @example binance
          */
         exchange: components['parameters']['ExchangeId']
@@ -798,7 +886,9 @@ export interface operations {
       header?: never
       path: {
         /**
-         * @description Exchange identifier (lowercase)
+         * @description Exchange identifier (lowercase). Includes centralized exchanges
+         *     (`binance`, `bybit`, `coinbase`, `kraken`, `okx`) and decentralized
+         *     exchanges (e.g. `raydium-solana`, `uniswapv3-ethereum`, `uniswapv4-ethereum`).
          * @example binance
          */
         exchange: components['parameters']['ExchangeId']
@@ -878,7 +968,9 @@ export interface operations {
       header?: never
       path: {
         /**
-         * @description Exchange identifier (lowercase)
+         * @description Exchange identifier (lowercase). Includes centralized exchanges
+         *     (`binance`, `bybit`, `coinbase`, `kraken`, `okx`) and decentralized
+         *     exchanges (e.g. `raydium-solana`, `uniswapv3-ethereum`, `uniswapv4-ethereum`).
          * @example binance
          */
         exchange: components['parameters']['ExchangeId']
