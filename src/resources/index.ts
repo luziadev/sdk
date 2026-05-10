@@ -3,6 +3,8 @@
  */
 
 export { ExchangesResource } from './exchanges.ts'
+export { FiatCurrenciesResource } from './fiat-currencies.ts'
 export { HistoryResource } from './history.ts'
 export { MarketsResource } from './markets.ts'
 export { TickersResource } from './tickers.ts'
+export { TokensResource } from './tokens.ts'

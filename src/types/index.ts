@@ -20,8 +20,20 @@ export type ExchangeListResponse = components['schemas']['ExchangeListResponse']
 /** Exchange kind: centralized (`cex`) or decentralized (`dex`). */
 export type ExchangeType = NonNullable<Exchange['type']>
 
-/** On-chain token referenced by a DEX market. */
+/** Canonical asset or on-chain token. */
 export type Token = components['schemas']['Token']
+
+/** Response from the list tokens endpoint */
+export type TokenListResponse = components['schemas']['TokenListResponse']
+
+/** ISO 4217 fiat currency. */
+export type FiatCurrency = components['schemas']['FiatCurrency']
+
+/** Response from the list fiat currencies endpoint */
+export type FiatCurrencyListResponse = components['schemas']['FiatCurrencyListResponse']
+
+/** Pagination metadata returned alongside paginated list responses */
+export type Pagination = components['schemas']['Pagination']
 
 /** Trading pair (market) information */
 export type Market = components['schemas']['Market']

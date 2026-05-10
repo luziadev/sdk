@@ -2,7 +2,7 @@
  * Auto-generated TypeScript types from the Luzia OpenAPI specification.
  * DO NOT EDIT MANUALLY - regenerate with: bun run generate
  *
- * Generated at: 2026-05-10T13:50:03.292Z
+ * Generated at: 2026-05-10T16:22:50.160Z
  */
 
 export type paths = {
@@ -21,6 +21,44 @@ export type paths = {
      *     Use the `type` query parameter to filter by exchange kind.
      */
     get: operations['getExchanges']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/v1/fiat-currencies': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * List fiat currencies
+     * @description Returns ISO 4217 fiat currencies referenced by markets (USD, EUR, GBP, ...).
+     *     Stablecoins (USDC, USDT, DAI) are tokens, not fiat — see `/v1/tokens`.
+     */
+    get: operations['listFiatCurrencies']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  [path: `/v1/fiat-currencies/${string}`]: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get a fiat currency by ISO 4217 code */
+    get: operations['getFiatCurrency']
     put?: never
     post?: never
     delete?: never
@@ -144,6 +182,49 @@ export type paths = {
     patch?: never
     trace?: never
   }
+  '/v1/tokens': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * List tokens
+     * @description Returns a paginated list of tokens. Tokens may be either chainless
+     *     canonical assets (`chainId` and `address` null, id `crypto:SYMBOL`)
+     *     or on-chain instances (`chainId` and `address` set, id `{chain}:SYMBOL`).
+     */
+    get: operations['listTokens']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  [path: `/v1/tokens/${string}`]: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Get a token by id
+     * @description Returns a single token by composite id (`crypto:SYMBOL` for chainless
+     *     canonical assets, `{chainId}:SYMBOL` for on-chain instances).
+     */
+    get: operations['getToken']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export type components = {
@@ -207,6 +288,26 @@ export type components = {
     }
     ExchangeListResponse: {
       exchanges?: components['schemas']['Exchange'][]
+    }
+    /** @description ISO 4217 fiat currency. */
+    FiatCurrency: {
+      /**
+       * @description ISO 4217 currency code.
+       * @example USD
+       */
+      code: string
+      enabled: boolean
+      /** @example United States Dollar */
+      name: string
+      /**
+       * @description Display glyph.
+       * @example $
+       */
+      symbol?: string | null
+    }
+    FiatCurrencyListResponse: {
+      data: components['schemas']['FiatCurrency'][]
+      pagination: components['schemas']['Pagination']
     }
     /**
      * @description Trading pair information. Centralized-exchange (CEX) markets always include
@@ -392,6 +493,12 @@ export type components = {
        */
       symbol?: string
     }
+    Pagination: {
+      limit: number
+      page: number
+      pages: number
+      total: number
+    }
     /** @description Real-time price data for a trading pair */
     Ticker: {
       /**
@@ -486,28 +593,64 @@ export type components = {
       /** @description Total number of tickers matching filters */
       total?: number
     }
-    /** @description On-chain token referenced by a DEX market. */
+    /**
+     * @description Canonical asset or on-chain token. Chain-bound rows have `chainId` and
+     *     `address` set; chainless canonical rows (id `crypto:SYMBOL`) have both null.
+     */
     Token: {
       /**
-       * @description On-chain token address (Solana mint or EVM contract address).
+       * @description On-chain token address (Solana mint or EVM contract address). Null for chainless canonicals.
        * @example EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
        */
-      address: string
+      address?: string | null
       /**
-       * @description Blockchain identifier (matches Exchange.chainId).
+       * @description For on-chain rows, the chainless `crypto:SYMBOL` row this token mirrors. Null on canonicals.
+       * @example crypto:USDC
+       */
+      canonicalId?: string | null
+      /**
+       * @description Blockchain identifier (matches Exchange.chainId). Null for chainless canonicals.
        * @example solana
        */
-      chainId: string
+      chainId?: string | null
       /**
        * @description Token decimal places.
        * @example 6
        */
       decimals: number
       /**
+       * @description Composite id — `crypto:SYMBOL` for chainless canonicals, `{chainId}:SYMBOL` for on-chain instances.
+       * @example crypto:USDC
+       */
+      id?: string
+      /** Format: uri */
+      logoUrl?: string | null
+      /**
+       * @description Token display name.
+       * @example USD Coin
+       */
+      name?: string
+      /**
        * @description Token symbol.
        * @example USDC
        */
       symbol: string
+      /**
+       * @description Free-form tags such as `stablecoin`, `wrapped-native`, `xstock`.
+       * @example [
+       *       "stablecoin"
+       *     ]
+       */
+      tags?: string[]
+      /**
+       * @description Total supply as a base-10 integer string (uint256). Combined with `decimals` for display.
+       * @example 21000000000000000000000000
+       */
+      totalSupply?: string | null
+    }
+    TokenListResponse: {
+      data: components['schemas']['Token'][]
+      pagination: components['schemas']['Pagination']
     }
   }
   responses: {
@@ -725,6 +868,67 @@ export interface operations {
         }
       }
       400: components['responses']['BadRequest']
+      500: components['responses']['InternalServerError']
+    }
+  }
+  listFiatCurrencies: {
+    parameters: {
+      query?: {
+        /** @description Filter by enabled state. Defaults to `true`. */
+        enabled?: 'all' | true | false
+        limit?: number
+        page?: number
+        search?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Paginated list of fiat currencies */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['FiatCurrencyListResponse']
+        }
+      }
+      401: components['responses']['Unauthorized']
+      429: components['responses']['RateLimited']
+      500: components['responses']['InternalServerError']
+    }
+  }
+  getFiatCurrency: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /**
+         * @description ISO 4217 currency code (e.g. `USD`, `EUR`).
+         * @example USD
+         */
+        code: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Fiat currency detail */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['FiatCurrency']
+          }
+        }
+      }
+      401: components['responses']['Unauthorized']
+      404: components['responses']['NotFound']
+      429: components['responses']['RateLimited']
       500: components['responses']['InternalServerError']
     }
   }
@@ -993,6 +1197,73 @@ export interface operations {
       429: components['responses']['RateLimited']
       500: components['responses']['InternalServerError']
       503: components['responses']['ServiceUnavailable']
+    }
+  }
+  listTokens: {
+    parameters: {
+      query?: {
+        /** @description Filter by chain id (e.g. `ethereum`, `solana`). */
+        chainId?: string
+        /**
+         * @description `true` returns on-chain tokens only, `false` returns chainless
+         *     canonical tokens only. Omit for both.
+         */
+        hasChain?: true | false
+        limit?: number
+        page?: number
+        /** @description Search across symbol, name, and id (case-insensitive). */
+        search?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Paginated list of tokens */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['TokenListResponse']
+        }
+      }
+      401: components['responses']['Unauthorized']
+      429: components['responses']['RateLimited']
+      500: components['responses']['InternalServerError']
+    }
+  }
+  getToken: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /**
+         * @description Token id (URL-encoded, e.g. `crypto%3AUSDC` or `ethereum%3AWETH`).
+         * @example crypto:USDC
+         */
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Token detail */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['Token']
+          }
+        }
+      }
+      401: components['responses']['Unauthorized']
+      404: components['responses']['NotFound']
+      429: components['responses']['RateLimited']
+      500: components['responses']['InternalServerError']
     }
   }
 }

@@ -7,9 +7,11 @@
 
 import { createErrorFromResponse, LuziaError, parseRateLimitHeaders } from './errors.ts'
 import { ExchangesResource } from './resources/exchanges.ts'
+import { FiatCurrenciesResource } from './resources/fiat-currencies.ts'
 import { HistoryResource } from './resources/history.ts'
 import { MarketsResource } from './resources/markets.ts'
 import { TickersResource } from './resources/tickers.ts'
+import { TokensResource } from './resources/tokens.ts'
 import { type OnRetryCallback, withRetry } from './retry.ts'
 import type { LuziaOptions, RateLimitInfo, RetryOptions } from './types/index.ts'
 import { LuziaWebSocket, type WebSocketOptions } from './websocket.ts'
@@ -142,12 +144,16 @@ export class Luzia {
 
   /** Exchange resource for listing supported exchanges */
   readonly exchanges: ExchangesResource
+  /** Fiat currencies resource for listing ISO 4217 fiat referenced by markets */
+  readonly fiatCurrencies: FiatCurrenciesResource
   /** History resource for fetching OHLCV candle data */
   readonly history: HistoryResource
   /** Markets resource for listing trading pairs */
   readonly markets: MarketsResource
   /** Tickers resource for getting price data */
   readonly tickers: TickersResource
+  /** Tokens resource for canonical assets and on-chain tokens */
+  readonly tokens: TokensResource
 
   constructor(options: LuziaOptions) {
     if (!options.apiKey) {
@@ -162,9 +168,11 @@ export class Luzia {
 
     // Initialize resource instances
     this.exchanges = new ExchangesResource(this)
+    this.fiatCurrencies = new FiatCurrenciesResource(this)
     this.history = new HistoryResource(this)
     this.markets = new MarketsResource(this)
     this.tickers = new TickersResource(this)
+    this.tokens = new TokensResource(this)
   }
 
   /**
