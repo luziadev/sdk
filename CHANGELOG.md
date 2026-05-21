@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-05-21
+
+### Added
+
+- **Tokens resource:** `luzia.tokens.list(options?)` and `luzia.tokens.get(id)` — list and
+  look up canonical assets and on-chain tokens (`GET /v1/tokens`, `GET /v1/tokens/:id`)
+  - Filters: `search`, `chainId`, `hasChain`, `page`, `limit`
+- **Fiat currencies resource:** `luzia.fiatCurrencies.list(options?)` and
+  `luzia.fiatCurrencies.get(code)` — list and look up ISO 4217 fiat currencies referenced
+  by markets (`GET /v1/fiat-currencies`, `GET /v1/fiat-currencies/:code`)
+  - Filters: `search`, `enabled`, `page`, `limit`
+- **DEX support:** `luzia.exchanges.list()` accepts a `{ type: 'cex' | 'dex' }` filter;
+  `Exchange` gains `type`, `chainId`, and `dexId`; `Market` gains `type: 'dex'`, `chainId`,
+  `poolAddress`, `poolType`, `baseToken`, and `quoteToken` for decentralized-exchange pools.
+  DEX tickers are served transparently through the existing `tickers` resource
+- New exported types: `Token`, `TokenListResponse`, `FiatCurrency`,
+  `FiatCurrencyListResponse`, `Pagination`
+- New exported resource classes and option types: `TokensResource`,
+  `FiatCurrenciesResource`, `ListTokensOptions`, `TokensListPage`,
+  `ListFiatCurrenciesOptions`, `FiatCurrenciesListPage`
+
+### Fixed
+
+- Exported `TokensResource`, `FiatCurrenciesResource`, and their supporting types from the
+  package entry point — they were reachable at runtime via `luzia.tokens` /
+  `luzia.fiatCurrencies` but could not be imported by name
+
+### Changed
+
+- Regenerated types from the latest OpenAPI specification
+
+### Note
+
+- Timestamp formats clarified (the [1.1.1] note below is now partly outdated). Verified
+  against the production API: **all REST timestamps** (`Ticker.timestamp`,
+  `OHLCVCandle.timestamp`, `OHLCVResponse.start`/`end`) are numeric Unix milliseconds,
+  while **all WebSocket timestamps** (the `ticker` envelope `timestamp`, its inner
+  `data.timestamp`, and `pong.timestamp`) are RFC 3339 strings.
+
 ## [1.1.1] - 2026-02-18
 
 ### Changed

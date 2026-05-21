@@ -58,8 +58,10 @@ export interface WSTickerData {
     quoteVolume: number | null
     change: number | null
     changePercent: number | null
+    /** Ticker observation time as an RFC 3339 string. */
     timestamp: string
   }
+  /** Server broadcast time as an RFC 3339 string. */
   timestamp: string
 }
 

@@ -53,12 +53,19 @@ export {
 
 // Resources
 export type { ListExchangesOptions } from './resources/exchanges.ts'
+export type {
+  FiatCurrenciesListPage,
+  ListFiatCurrenciesOptions,
+} from './resources/fiat-currencies.ts'
 export {
   ExchangesResource,
+  FiatCurrenciesResource,
   HistoryResource,
   MarketsResource,
   TickersResource,
+  TokensResource,
 } from './resources/index.ts'
+export type { ListTokensOptions, TokensListPage } from './resources/tokens.ts'
 
 // Retry
 export type { OnRetryCallback, ResolvedRetryOptions, RetryContext } from './retry.ts'
@@ -77,6 +84,8 @@ export type {
   ExchangeListResponse,
   ExchangeStatus,
   ExchangeType,
+  FiatCurrency,
+  FiatCurrencyListResponse,
   GetHistoryOptions,
   ListMarketsOptions,
   ListTickersFilteredOptions,
@@ -87,6 +96,7 @@ export type {
   MarketType,
   OHLCVCandle,
   OHLCVResponse,
+  Pagination,
   PaginationOptions,
   RateLimitErrorResponse,
   RateLimitInfo,
@@ -94,6 +104,7 @@ export type {
   Ticker,
   TickerListResponse,
   Token,
+  TokenListResponse,
 } from './types/index.ts'
 export type {
   WebSocketConstructor,

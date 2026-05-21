@@ -72,8 +72,14 @@ const luzia = new Luzia({
 ### Exchanges
 
 ```typescript
-// List all supported exchanges
+// List all supported exchanges (centralized and decentralized)
 const exchanges = await luzia.exchanges.list()
+
+// Filter by exchange kind
+const cexes = await luzia.exchanges.list({ type: 'cex' })
+const dexes = await luzia.exchanges.list({ type: 'dex' })
+// DEX exchanges include `chainId` and `dexId`, e.g.
+// { id: 'raydium-solana', type: 'dex', chainId: 'solana', dexId: 'raydium', ... }
 ```
 
 ### Tickers
@@ -108,6 +114,10 @@ const { markets, total } = await luzia.markets.list('binance', {
   limit: 100,
   offset: 0,
 })
+
+// DEX markets (type: 'dex') carry on-chain metadata instead of CEX
+// precision/limits: `chainId`, `poolAddress`, `poolType`, `baseToken`, `quoteToken`
+const { markets: dexMarkets } = await luzia.markets.list('raydium-solana')
 ```
 
 ### History (OHLCV Candles)
@@ -132,7 +142,7 @@ const { candles } = await luzia.history.get('binance', 'BTC/USDT', {
 // Each candle contains:
 for (const candle of candles) {
   console.log({
-    timestamp: candle.timestamp, // Candle open time (RFC 3339 string)
+    timestamp: candle.timestamp, // Candle open time (Unix ms)
     open: candle.open,
     high: candle.high,
     low: candle.low,
@@ -150,6 +160,47 @@ for (const candle of candles) {
 |------|-------------|
 | Free | 30 days |
 | Pro  | 90 days |
+
+> History (OHLCV) is not available for DEX exchanges — those requests return a
+> `not_found` error.
+
+### Tokens
+
+Tokens are canonical assets (`crypto:SYMBOL`, e.g. `crypto:USDC`) or on-chain instances
+(`{chainId}:SYMBOL`, e.g. `solana:USDC`). On-chain rows carry `chainId` and `address`;
+chainless canonical rows have both `null`.
+
+```typescript
+// List tokens (paginated)
+const { data, pagination } = await luzia.tokens.list({
+  search: 'USDC',     // Optional: match symbol, name, or id
+  chainId: 'solana',  // Optional: filter by chain
+  hasChain: true,     // Optional: true = on-chain only, false = canonical only
+  page: 1,
+  limit: 20,          // 1-100, default 20
+})
+
+// Look up a single token by composite id
+const usdc = await luzia.tokens.get('crypto:USDC')
+```
+
+### Fiat Currencies
+
+ISO 4217 fiat currencies (USD, EUR, GBP, ...) referenced by markets. Stablecoins such as
+USDC and USDT are tokens, not fiat — use `luzia.tokens` for those.
+
+```typescript
+// List fiat currencies (paginated)
+const { data, pagination } = await luzia.fiatCurrencies.list({
+  search: 'dollar',  // Optional: match code or name
+  enabled: true,     // Optional: true (default) | false | 'all'
+  page: 1,
+  limit: 50,         // 1-200, default 50
+})
+
+// Look up a single currency by ISO 4217 code
+const usd = await luzia.fiatCurrencies.get('USD')
+```
 
 ## WebSocket (Real-Time Updates)
 
@@ -348,8 +399,13 @@ import type {
   // REST API
   Exchange,
   ExchangeStatus,
+  ExchangeType,
   Market,
+  MarketType,
   Ticker,
+  Token,
+  FiatCurrency,
+  Pagination,
   OHLCVCandle,
   OHLCVResponse,
   CandleInterval,
